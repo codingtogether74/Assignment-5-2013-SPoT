@@ -5,7 +5,7 @@
 //  Created by Tatiana Kornilova on 2/22/13.
 //  Copyright (c) 2013 Tatiana Kornilova. All rights reserved.
 // Took chache from Felix Vigl https://github.com/bzzbzzz/CS193P.HW5.FastSPoT.git
-//
+// Took NetworkIndicatorHelper from Henry Tsai https://github.com/tsunglintsai/SPot
 
 #import "ImageViewController.h"
 #import "AttributedStringViewController.h"
@@ -71,12 +71,13 @@
 
 -(void)resetImage
 {
-    if (self.scrollView) {
+    if (self.scrollView && self.imageURL!= nil) {
         self.scrollView.contentSize =CGSizeZero;
         self.imageView.image =nil;
         self.stopZooming =NO;
-       
+        
         [self.spinner startAnimating];
+        [NetworkIndicatorHelper setNetworkActivityIndicatorVisible:YES];
         NSURL *imageURL =self.imageURL;
         
         dispatch_queue_t downLoadQueue = dispatch_queue_create("image downloader", NULL);
@@ -84,27 +85,28 @@
             //----
             NSString *fileURLlast = [[self.imageURL pathComponents] lastObject];
             NSData *imageData = [[CacheForNSData sharedInstance] dataInCacheForIdentifier:fileURLlast];
-            	 if (!imageData){
-                             [NetworkIndicatorHelper setNetworkActivityIndicatorVisible:YES];
-                             imageData = [[NSData alloc] initWithContentsOfURL:self.imageURL];
-                             [NetworkIndicatorHelper setNetworkActivityIndicatorVisible:NO];
-
-                             [[CacheForNSData sharedInstance] cacheData:imageData withIdentifier:fileURLlast];
-                 }
-         //----                     
+            if (!imageData){
+                imageData = [[NSData alloc] initWithContentsOfURL:self.imageURL];
+                
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+                    [[CacheForNSData sharedInstance] cacheData:imageData withIdentifier:fileURLlast];
+                });
+            }
+            //----
             UIImage *image =[[UIImage alloc] initWithData:imageData];
             if (self.imageURL == imageURL) {
-                 dispatch_async(dispatch_get_main_queue(), ^{
-                if (image) {                    
-                    self.scrollView.zoomScale =1.0;
-                    self.scrollView.contentSize  =image.size;
-                    self.imageView.image =image;
-                    self.imageView.frame =CGRectMake(0, 0, image.size.width, image.size.width);
-                }
-            [self.spinner stopAnimating];
-            });
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (image) {
+                        self.scrollView.zoomScale =1.0;
+                        self.scrollView.contentSize  =image.size;
+                        self.imageView.image =image;
+                        self.imageView.frame =CGRectMake(0, 0, image.size.width, image.size.width);
+                    }
+                    [NetworkIndicatorHelper setNetworkActivityIndicatorVisible:NO];
+                    [self.spinner stopAnimating];
+                });
             }
-         });
+        });
     }
 }
 

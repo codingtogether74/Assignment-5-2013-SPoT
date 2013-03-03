@@ -58,11 +58,14 @@
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="zrz-Jp-Lro"/>
+                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" hidesWhenStopped="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="UP5-tx-dkG"/>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="zrz-Jp-Lro" firstAttribute="top" secondItem="mtf-tz-a90" secondAttribute="top" type="default" id="1Yd-Jp-yOc"/>
                             <constraint firstItem="zrz-Jp-Lro" firstAttribute="trailing" secondItem="mtf-tz-a90" secondAttribute="trailing" type="default" id="DT3-mo-UHO"/>
+                            <constraint firstItem="UP5-tx-dkG" firstAttribute="leading" secondItem="mtf-tz-a90" secondAttribute="leading" constant="141" id="HfK-3B-DPk"/>
+                            <constraint firstItem="UP5-tx-dkG" firstAttribute="centerY" secondItem="zrz-Jp-Lro" secondAttribute="centerY" type="default" id="KVr-YW-HtS"/>
                             <constraint firstItem="zrz-Jp-Lro" firstAttribute="leading" secondItem="mtf-tz-a90" secondAttribute="leading" type="default" id="jgc-eI-zjM"/>
                             <constraint firstItem="zrz-Jp-Lro" firstAttribute="bottom" secondItem="mtf-tz-a90" secondAttribute="bottom" type="default" id="kTG-OX-Ej4"/>
                         </constraints>
@@ -70,6 +73,7 @@
                     <navigationItem key="navigationItem" id="LZ4-UZ-jvb"/>
                     <connections>
                         <outlet property="scrollView" destination="zrz-Jp-Lro" id="P00-AC-atV"/>
+                        <outlet property="spinner" destination="UP5-tx-dkG" id="RbK-JZ-jmm"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="DsA-02-bNH" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -237,6 +241,7 @@
             <source key="sourceIdentifier" type="project" relativePath="./Classes/ImageViewController.h"/>
             <relationships>
                 <relationship kind="outlet" name="scrollView" candidateClass="UIScrollView"/>
+                <relationship kind="outlet" name="spinner" candidateClass="UIActivityIndicatorView"/>
                 <relationship kind="outlet" name="titleBarButtonItem" candidateClass="UIBarButtonItem"/>
                 <relationship kind="outlet" name="toolBar" candidateClass="UIToolbar"/>
             </relationships>
