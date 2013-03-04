@@ -78,11 +78,9 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {  // only iPad
-        NSURL *url =[FlickrFetcher urlForPhoto:self.photos[indexPath.row] format:FlickrPhotoFormatLarge];
-        //----
+        NSURL *url =[FlickrFetcher urlForPhoto:self.photos[indexPath.row] format:FlickrPhotoFormatOriginal];
         ImageViewController *photoViewController =
         (ImageViewController *) [[self.splitViewController viewControllers] lastObject];
-        //-----
         if (photoViewController) {
             if ([photoViewController respondsToSelector:@selector(setImageURL:)]) {
                 [photoViewController  performSelector:@selector(setImageURL:) withObject:url];

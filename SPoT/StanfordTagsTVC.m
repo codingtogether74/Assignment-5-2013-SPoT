@@ -20,17 +20,16 @@
 
 @implementation StanfordTagsTVC
 
-
 - (void)viewDidLoad
 {
     [super viewDidLoad];
     
-    [self arrangedByTags];
+    [self loadStanfordPhotos];
     
     // a UIRefreshControl inherits from UIControl, so we can use normal target/action
     // this is the first time you’ve seen this done without ctrl-dragging in Xcode
     [self.refreshControl addTarget:self
-                            action:@selector(arrangedByTags)
+                            action:@selector(loadStanfordPhotos)
                   forControlEvents:UIControlEventValueChanged];
 
  }
@@ -46,18 +45,33 @@
     return [[NSArray alloc] initWithObjects:@"cs193pspot", @"portrait", @"landscape", nil];
 }
 
--(void)arrangedByTags
+- (void)loadStanfordPhotos
+{
+    [self startRefreshControl];
+    
+    dispatch_queue_t flickrQ = dispatch_queue_create("Photos from flickr", NULL);
+    dispatch_async(flickrQ, ^{
+        
+        [NetworkIndicatorHelper setNetworkActivityIndicatorVisible:YES];
+        NSArray *photosStanford = [FlickrFetcher stanfordPhotos];
+        [NetworkIndicatorHelper setNetworkActivityIndicatorVisible:NO];
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            
+            [self arrangedByTags:photosStanford];
+            [self.tableView reloadData];
+            [self stopRefreshing];
+            
+        });
+    });
+}
+-(void)arrangedByTags:(NSArray *)photosStanford
 {
     // We want to divide the photos up by tag, so we can use a dictionary with the
 	// tag name as key and the array of photos as values
     
-    [self.refreshControl beginRefreshing];
-    [NetworkIndicatorHelper setNetworkActivityIndicatorVisible:YES];
-    dispatch_queue_t flickrQ = dispatch_queue_create("Photos from flickr", NULL);
-    dispatch_async(flickrQ, ^{
-        
         NSMutableDictionary *photosByTag = [NSMutableDictionary dictionary];
-        for (NSDictionary *photo in [FlickrFetcher stanfordPhotos]) {
+        for (NSDictionary *photo in photosStanford) {
             NSMutableArray *photoTags=[[photo[FLICKR_TAGS] componentsSeparatedByString:@" "] mutableCopy]; //one photo tags
             [photoTags removeObjectsInArray:self.ignoredTags];
             for (NSString *tag in photoTags) {
@@ -70,14 +84,8 @@
                 [(NSMutableArray *)[photosByTag  objectForKey:tag] addObject:photo];
             }
         }
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [NetworkIndicatorHelper setNetworkActivityIndicatorVisible:NO];
             self.photosByTags =photosByTag;
             self.Tags =[[self.photosByTags allKeys] sortedArrayUsingSelector:@selector(compare:)];
-            [self.tableView reloadData];
-            [self.refreshControl endRefreshing];
-        });
-    });
 }
 
 #pragma mark - Table view data source
@@ -126,4 +134,26 @@
         }
     }
 }
+- (void)startRefreshControl
+{
+    [self.refreshControl beginRefreshing];
+    //--------------------
+	//set the title while refreshing
+    self.refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"Refreshing the TableView"];
+    //set the date and time of refreshing
+    NSDateFormatter *formattedDate = [[NSDateFormatter alloc] init];
+    [formattedDate setDateFormat:@"MMM d, h:mm a"];
+    NSString *lastupdated = [NSString stringWithFormat:@"Last Updated on %@",[formattedDate stringFromDate:[NSDate date]]];
+    self.refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:lastupdated];	
+    //--------------------
+}
+
+- (void)stopRefreshing
+{
+	if (self.refreshControl.refreshing) {
+		[self.refreshControl endRefreshing];
+		[self.tableView setContentOffset:CGPointZero animated:YES];
+	}
+}
+
 @end

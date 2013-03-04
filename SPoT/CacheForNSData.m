@@ -86,12 +86,32 @@
 	return _sharedObject;
 }
 
+// returns the local URL to access the Caches/Images dir and creates it if does not exist
++ (NSURL *)URLForImagesDir
+{
+    // contruct local path to images subdir in cache dir
+    NSFileManager *fm = [[NSFileManager alloc] init];
+    NSURL *cachesDir = [fm URLForDirectory:NSCachesDirectory inDomain:NSUserDomainMask appropriateForURL:nil create:NO error:nil];
+    NSURL *imagesDir = [cachesDir URLByAppendingPathComponent:@"Images"];
+    // if the images directory does not exist we create it (lazy instantiation!?)
+    if (![fm fileExistsAtPath:[imagesDir path]]) {
+        [fm createDirectoryAtURL:imagesDir withIntermediateDirectories:YES attributes:nil error:nil];
+    }
+    return imagesDir;
+}
 - (NSString *)cacheDirectory
 {
 	if (!_cacheDirectory) {
-	NSArray * cacheDirectoriesURLsArray = [self.fileManager URLsForDirectory:NSCachesDirectory inDomains:NSUserDomainMask];
-	_cacheDirectory = [[cacheDirectoriesURLsArray objectAtIndex:0] path];
-	}
+        // contruct local path to images subdir in cache dir
+       
+        NSURL *cachesDir = [self.fileManager URLForDirectory:NSCachesDirectory inDomain:NSUserDomainMask appropriateForURL:nil create:NO error:nil];
+        NSURL *imagesDir = [cachesDir URLByAppendingPathComponent:@"Images"];
+        // if the images directory does not exist we create it (lazy instantiation!?)
+        if (![self.fileManager fileExistsAtPath:[imagesDir path]]) {
+            [self.fileManager createDirectoryAtURL:imagesDir withIntermediateDirectories:YES attributes:nil error:nil];
+        }
+        _cacheDirectory=[imagesDir path];
+    }
 	return _cacheDirectory;
 }
 - (NSUInteger)maxCacheSize
