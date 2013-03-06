@@ -22,6 +22,7 @@ static NetworkIndicatorHelper *networkIndicatorHelper;
         networkIndicatorHelper.count++;
     }else{
         networkIndicatorHelper.count--;
+        networkIndicatorHelper.count= networkIndicatorHelper.count<0 ? 0:networkIndicatorHelper.count;
     }
     if(networkIndicatorHelper.count > 0){
         [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
